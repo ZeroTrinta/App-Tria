@@ -1,0 +1,99 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f7f6; /* Um cinza claro suave */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+}
+
+.quiz-container {
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    width: 90%;
+    max-width: 600px;
+    text-align: center;
+}
+
+h1 {
+    color: #007bff; /* Azul padrão para temas de saúde */
+    margin-bottom: 25px;
+}
+
+#question-text {
+    font-size: 1.2em;
+    margin-bottom: 20px;
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.options-grid {
+    display: grid;
+    grid-template-columns: 1fr; /* Uma coluna, fácil para celular */
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.option-button {
+    background-color: #e9ecef;
+    color: #333;
+    border: none;
+    padding: 15px;
+    text-align: left;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    font-size: 1em;
+}
+
+.option-button:hover:not(:disabled) {
+    background-color: #dee2e6;
+}
+
+/* Estilos para feedback */
+.correct {
+    background-color: #28a745 !important; /* Verde */
+    color: white;
+}
+
+.incorrect {
+    background-color: #dc3545 !important; /* Vermelho */
+    color: white;
+}
+
+.option-button:disabled {
+    cursor: default;
+    opacity: 0.6;
+}
+
+#next-button, #result button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1.1em;
+    margin-top: 15px;
+    transition: background-color 0.3s;
+}
+
+#next-button:hover:not(:disabled), #result button:hover {
+    background-color: #0056b3;
+}
+
+#next-button:disabled {
+    background-color: #a0c3ff;
+    cursor: not-allowed;
+}
+
+.hidden {
+    display: none;
+}
+
+#result h2 {
+    color: #28a745;
+}
