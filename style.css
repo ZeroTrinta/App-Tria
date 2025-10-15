@@ -18,6 +18,15 @@ body {
     text-align: center;
 }
 
+#app-name {
+    font-size: 0.9em;
+    color: #6c757d; /* Um cinza neutro e profissional */
+    margin-bottom: 5px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
 h1 {
     color: #17a2b8; 
     margin-bottom: 25px;

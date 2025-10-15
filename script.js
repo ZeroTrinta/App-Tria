@@ -1,6 +1,6 @@
 // ====================================================================
-// App-Tria | script.js
-// Lógica de Triagem e Encaminhamento de Saúde (UBS, UPA, Emergência)
+// App-Tria | script.js - PARTE 1: Dados e Variáveis
+// Lógica de Triagem Inteligente (Pontuação de Risco)
 // ====================================================================
 
 // Array de perguntas focado em triagem e orientação de serviço (UBS, UPA, Emergência)
@@ -48,26 +48,34 @@ const quizData = [
 
 // Mapeamento dos resultados (Onde o paciente deve ir)
 const resultsMap = {
+    // Definimos a pontuação de risco para cada tipo de resposta
     "UBS": {
         title: "Recomendação: Unidade Básica de Saúde (UBS)",
         message: "Seu caso é classificado como de BAIXA COMPLEXIDADE. A UBS é o local ideal para acompanhamento de doenças crônicas, vacinas, exames de rotina e sintomas leves. Procure o seu posto de saúde mais próximo.",
-        color: "#28a745" // Verde
+        color: "#28a745",
+        score: 1 
     },
     "UPA": {
         title: "Recomendação: Unidade de Pronto Atendimento (UPA)",
         message: "Seu caso é de MÉDIA COMPLEXIDADE e requer atenção rápida. A UPA tem capacidade para resolver a maioria das urgências, como febre persistente, vômitos, ou suturas de cortes leves.",
-        color: "#ffc107" // Amarelo/Laranja
+        color: "#ffc107",
+        score: 5
     },
     "EMERGENCIA": {
         title: "Recomendação: EMERGÊNCIA HOSPITALAR (Chame o SAMU/192)",
         message: "Seu caso é de ALTA COMPLEXIDADE. Dor no peito, falta de ar, sangramento incontrolável ou perda de consciência exigem atendimento IMEDIATO no hospital. Não dirija, chame o serviço de emergência.",
-        color: "#dc3545" // Vermelho
+        color: "#dc3545",
+        score: 100 // Pontuação alta, aciona o fim imediato
+    },
+    "NEXT": { // Tipo para continuar o quiz sem acumular risco (neutro)
+        score: 0 
     }
 };
 
 let currentQuestionIndex = 0;
 let userResult = ""; 
 let quizEnded = false;
+let riskScore = 0; // Variável para acumular a pontuação de risco
 
 // Referências aos elementos do HTML
 const questionTextElement = document.getElementById('question-text');
@@ -76,7 +84,10 @@ const nextButton = document.getElementById('next-button');
 const quizSection = document.getElementById('quiz');
 const resultSection = document.getElementById('result');
 
-// Nota: Removendo scoreDisplay e totalQuestionsDisplay, pois não são relevantes para triagem
+// ====================================================================
+// App-Tria | script.js - PARTE 2: Funções e Lógica
+// Implementação do fluxo e da pontuação
+// ====================================================================
 
 // --- Funções Principais ---
 
@@ -84,6 +95,7 @@ function startQuiz() {
     currentQuestionIndex = 0;
     userResult = "";
     quizEnded = false;
+    riskScore = 0; // ZERA PONTUAÇÃO DE RISCO
     resultSection.classList.add('hidden');
     quizSection.classList.remove('hidden');
     
@@ -104,7 +116,7 @@ function loadQuestion() {
     
     // Desabilita o botão "Próxima Pergunta" até que uma opção seja escolhida
     nextButton.disabled = true; 
-    nextButton.textContent = "Próxima Pergunta"; // Reseta o texto do botão
+    nextButton.textContent = "Próxima Pergunta"; 
     
     // Cria os botões de opção
     currentQuestion.options.forEach(option => {
@@ -125,23 +137,22 @@ function selectOption(e) {
     const selectedButton = e.target;
     const selectedType = selectedButton.dataset.type;
 
-    // 1. Remove o destaque 'selected' e desabilita todos os botões
+    // 1. Permite a mudança de seleção:
     Array.from(optionsContainer.children).forEach(button => {
-        button.disabled = true;
-        button.classList.remove('selected'); // LIMPA o estilo de seleção anterior
+        button.classList.remove('selected'); 
+        button.disabled = false; // Permite o clique em outro botão
     });
     
     // 2. Adiciona o destaque 'selected' ao botão clicado
     selectedButton.classList.add('selected');
 
-    // Armazena o resultado. 
-    userResult = selectedType;
+    // Armazena o tipo para a lógica do botão 'Ver Recomendação'
+    userResult = selectedType; 
     
-    // Habilita o botão para avançar (ou finalizar)
     nextButton.disabled = false;
     
-    // Atualiza o texto do botão de acordo com a escolha
-    if (userResult !== "NEXT" || currentQuestionIndex === quizData.length - 1) {
+    // Atualiza o texto do botão de acordo com a escolha (se for Emergência, termina)
+    if (selectedType === "EMERGENCIA" || currentQuestionIndex === quizData.length - 1) {
         nextButton.textContent = "Ver Recomendação";
     } else {
         nextButton.textContent = "Próxima Pergunta";
@@ -150,22 +161,44 @@ function selectOption(e) {
 
 function nextQuestion() {
     
-    // Se o resultado for uma emergência ou UBS/UPA (não for 'NEXT'), finaliza
-    if (userResult !== "NEXT") {
-        endQuiz(userResult);
+    // Garante que uma opção foi selecionada antes de prosseguir
+    const selectedOption = optionsContainer.querySelector('.selected');
+    if (!selectedOption) {
+        alert("Por favor, selecione uma opção para continuar.");
+        return;
+    }
+
+    const selectedType = selectedOption.dataset.type;
+    
+    // 1. ACUMULAR A PONTUAÇÃO DE RISCO:
+    // Pega a pontuação do tipo selecionado e adiciona ao score total
+    riskScore += resultsMap[selectedType].score; 
+
+    // 2. TRATAMENTO DE FIM IMEDIATO (EMERGÊNCIA)
+    if (selectedType === "EMERGENCIA") {
+        endQuiz("EMERGENCIA");
         return;
     }
     
-    // Avança para a próxima pergunta
+    // 3. AVANÇA PARA A PRÓXIMA PERGUNTA
     currentQuestionIndex++;
     
-    // Verifica se há mais perguntas
     if (currentQuestionIndex < quizData.length) {
         loadQuestion();
     } else {
-        // Se todas as perguntas foram respondidas e o último foi 'NEXT', 
-        // mas não chegou em um final específico, assume-se UBS (o mais seguro)
-        endQuiz("UBS"); 
+        // 4. FIM DO QUIZ: Usa a pontuação acumulada para definir o resultado final
+        
+        let finalType = "";
+        
+        // Se a pontuação acumulada for 7 ou mais, o caso é de UPA (média complexidade)
+        if (riskScore >= 7) { 
+            finalType = "UPA";
+        } else {
+            // Caso contrário, o risco é baixo ou neutro, e a UBS é suficiente
+            finalType = "UBS"; 
+        }
+        
+        endQuiz(finalType);
     }
 }
 
@@ -180,14 +213,14 @@ function endQuiz(finalType) {
     resultSection.querySelector('h2').textContent = resultData.title;
     resultSection.querySelector('h2').style.color = resultData.color;
     
-    // O innerHTML é atualizado na tag <p> com id="result-message-text"
+    // Atualiza a mensagem na tag <p> com id="result-message-text"
     document.getElementById('result-message-text').innerHTML = `
         ${resultData.message}
         <br><br>
+        **Sua pontuação de risco foi: ${riskScore}**
+        <br><br>
         **Lembre-se: Em caso de dúvida, procure o serviço de saúde mais próximo.**
     `;
-
-    // Garante que o display de pontuação seja ocultado no CSS
 }
 
 // --- Event Listeners e Inicialização ---
