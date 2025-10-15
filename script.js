@@ -1,7 +1,12 @@
+// ====================================================================
+// App-Tria | script.js
+// Lógica de Triagem e Encaminhamento de Saúde (UBS, UPA, Emergência)
+// ====================================================================
+
 // Array de perguntas focado em triagem e orientação de serviço (UBS, UPA, Emergência)
 const quizData = [
     {
-        question: "Qual dos seguintes sintomas você está sentindo AGORA?",
+        question: "1. Qual dos seguintes sintomas você está sentindo AGORA?",
         options: [
             { text: "Febre baixa (até 38°C), dor de garganta leve ou dor de cabeça discreta.", type: "UBS" },
             { text: "Febre alta (acima de 39°C), vômitos persistentes ou dor abdominal moderada.", type: "UPA" },
@@ -9,21 +14,36 @@ const quizData = [
         ],
     },
     {
-        question: "Seus sintomas começaram há quanto tempo?",
+        question: "2. Se você tem tosse, qual a característica principal?",
         options: [
-            { text: "Mais de 3 dias.", type: "UBS" },
-            { text: "Nas últimas 24 a 48 horas e estão piorando rápido.", type: "UPA" },
-            { text: "Menos de 24 horas, mas parecem risco de vida (dor intensa).", type: "EMERGENCIA" },
+            { text: "Tosse seca ou leve, sem dificuldade de respirar. ", type: "UBS" },
+            { text: "Tosse com secreção amarelada/esverdeada e febre que não passa. ", type: "UPA" },
+            { text: "Não tenho tosse ou tenho falta de ar imediata.", type: "NEXT" },
         ],
     },
     {
-        question: "Você precisa de receita ou acompanhamento para doença crônica (Diabetes, Hipertensão, etc.)?",
+        question: "3. Você está com dor. Descreva a intensidade e o início:",
         options: [
-            { text: "Sim, é a minha única necessidade hoje.", type: "UBS" },
-            { text: "Não. Estou com um quadro agudo (doença nova).", type: "NEXT" }, // Manda para próxima pergunta
+            { text: "Dor leve/moderada, que eu controlo com analgésicos comuns.", type: "UBS" },
+            { text: "Dor moderada a forte, que não melhora e limita minhas atividades.", type: "UPA" },
+            { text: "Dor súbita, insuportável e intensa (ex: dor de cabeça explosiva ou dor abdominal aguda).", type: "EMERGENCIA" },
         ],
     },
-    // Se precisar de mais perguntas, adicione aqui...
+    {
+        question: "4. Seu objetivo principal hoje é:",
+        options: [
+            { text: "Renovar receitas, pegar vacinas ou fazer exames de rotina.", type: "UBS" },
+            { text: "Avaliar um quadro agudo (doença que começou agora).", type: "NEXT" },
+        ],
+    },
+    {
+        question: "5. Seus sintomas começaram há quanto tempo?",
+        options: [
+            { text: "Há mais de 5 dias e estão estáveis/melhorando lentamente.", type: "UBS" },
+            { text: "Nas últimas 48 horas e estão piorando rápido.", type: "UPA" },
+            { text: "Menos de 24 horas, mas parecem risco de vida (dor intensa).", type: "EMERGENCIA" },
+        ],
+    },
 ];
 
 // Mapeamento dos resultados (Onde o paciente deve ir)
@@ -46,7 +66,7 @@ const resultsMap = {
 };
 
 let currentQuestionIndex = 0;
-let userResult = ""; // Irá armazenar o tipo de recomendação final
+let userResult = ""; 
 let quizEnded = false;
 
 // Referências aos elementos do HTML
@@ -55,8 +75,8 @@ const optionsContainer = document.getElementById('options-container');
 const nextButton = document.getElementById('next-button');
 const quizSection = document.getElementById('quiz');
 const resultSection = document.getElementById('result');
-const scoreDisplay = document.getElementById('score-display');
-const totalQuestionsDisplay = document.getElementById('total-questions-display');
+
+// Nota: Removendo scoreDisplay e totalQuestionsDisplay, pois não são relevantes para triagem
 
 // --- Funções Principais ---
 
@@ -66,6 +86,10 @@ function startQuiz() {
     quizEnded = false;
     resultSection.classList.add('hidden');
     quizSection.classList.remove('hidden');
+    
+    // Configura o texto do resultado para o HTML
+    document.getElementById('result-message-text').innerHTML = '';
+
     loadQuestion();
 }
 
@@ -80,6 +104,7 @@ function loadQuestion() {
     
     // Desabilita o botão "Próxima Pergunta" até que uma opção seja escolhida
     nextButton.disabled = true; 
+    nextButton.textContent = "Próxima Pergunta"; // Reseta o texto do botão
     
     // Cria os botões de opção
     currentQuestion.options.forEach(option => {
@@ -100,22 +125,22 @@ function selectOption(e) {
     const selectedButton = e.target;
     const selectedType = selectedButton.dataset.type;
 
-    // Desabilita todos os botões após a escolha
+    // 1. Remove o destaque 'selected' e desabilita todos os botões
     Array.from(optionsContainer.children).forEach(button => {
         button.disabled = true;
-        // Marca a opção escolhida visualmente (opcional, pode ser adaptado)
-        if (button !== selectedButton) {
-             button.style.opacity = '0.7';
-        }
+        button.classList.remove('selected'); // LIMPA o estilo de seleção anterior
     });
     
-    // Armazena o resultado. Se o tipo não for "NEXT", o quiz pode encerrar.
+    // 2. Adiciona o destaque 'selected' ao botão clicado
+    selectedButton.classList.add('selected');
+
+    // Armazena o resultado. 
     userResult = selectedType;
     
     // Habilita o botão para avançar (ou finalizar)
     nextButton.disabled = false;
     
-    // Atualiza o texto do botão
+    // Atualiza o texto do botão de acordo com a escolha
     if (userResult !== "NEXT" || currentQuestionIndex === quizData.length - 1) {
         nextButton.textContent = "Ver Recomendação";
     } else {
@@ -154,15 +179,15 @@ function endQuiz(finalType) {
     // Atualiza o conteúdo da seção de resultado com a recomendação
     resultSection.querySelector('h2').textContent = resultData.title;
     resultSection.querySelector('h2').style.color = resultData.color;
-    resultSection.querySelector('p').innerHTML = `
+    
+    // O innerHTML é atualizado na tag <p> com id="result-message-text"
+    document.getElementById('result-message-text').innerHTML = `
         ${resultData.message}
         <br><br>
         **Lembre-se: Em caso de dúvida, procure o serviço de saúde mais próximo.**
     `;
 
-    // Remove o display de pontuação que não é necessário neste tipo de quiz
-    // scoreDisplay.textContent = 0; 
-    // totalQuestionsDisplay.textContent = quizData.length;
+    // Garante que o display de pontuação seja ocultado no CSS
 }
 
 // --- Event Listeners e Inicialização ---
