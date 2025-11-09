@@ -8,8 +8,8 @@ const quizData = [
     {
         question: "1. Qual dos seguintes sintomas você está sentindo AGORA?",
         options: [
-            { text: "Febre baixa (até 38°C), dor de garganta leve ou dor de cabeça discreta.", type: "UBS" },
-            { text: "Febre alta (acima de 39°C), vômitos persistentes ou dor abdominal moderada.", type: "UPA" },
+            { text: "Febre baixa (até 38°C), dor de garganta leve, tosse ou dor de cabeça discreta.", type: "UBS" },
+            { text: "Febre alta (acima de 39°C), vômitos persistentes, cabeça moderada a forte (enxaqueca) ou dor abdominal moderada.", type: "UPA" },
             { text: "Dor no peito, falta de ar súbita, sangramento grave ou perda de consciência.", type: "EMERGENCIA" },
         ],
     },
@@ -17,7 +17,9 @@ const quizData = [
         question: "2. Se você tem tosse, qual a característica principal?",
         options: [
             { text: "Tosse seca ou leve, sem dificuldade de respirar. ", type: "UBS" },
+            { text: "Tosse seca ou leve, com falta de ar leve. ", type: "UBS" },
             { text: "Tosse com secreção amarelada/esverdeada e febre que não passa. ", type: "UPA" },
+            { text: "Tosse com secreção amarelada/esverdeada sem febre aparente. ", type: "UPA" },
             { text: "Não tenho tosse ou tenho falta de ar imediata.", type: "NEXT" },
         ],
     },
@@ -27,12 +29,13 @@ const quizData = [
             { text: "Dor leve/moderada, que eu controlo com analgésicos comuns.", type: "UBS" },
             { text: "Dor moderada a forte, que não melhora e limita minhas atividades.", type: "UPA" },
             { text: "Dor súbita, insuportável e intensa (ex: dor de cabeça explosiva ou dor abdominal aguda).", type: "EMERGENCIA" },
+            { text: "Não tenho dor", type: "NEXT" },
         ],
     },
     {
         question: "4. Seu objetivo principal hoje é:",
         options: [
-            { text: "Renovar receitas, pegar vacinas ou fazer exames de rotina.", type: "UBS" },
+            { text: "Renovar receitas, tomar vacinas ou fazer exames de rotina.", type: "UBS" },
             { text: "Avaliar um quadro agudo (doença que começou agora).", type: "NEXT" },
         ],
     },
@@ -41,7 +44,7 @@ const quizData = [
         options: [
             { text: "Há mais de 5 dias e estão estáveis/melhorando lentamente.", type: "UBS" },
             { text: "Nas últimas 48 horas e estão piorando rápido.", type: "UPA" },
-            { text: "Menos de 24 horas, mas parecem risco de vida (dor intensa).", type: "EMERGENCIA" },
+            { text: "Menos de 24 horas, incapacitante/dor intensa.", type: "EMERGENCIA" },
         ],
     },
 ];
@@ -57,14 +60,14 @@ const resultsMap = {
     },
     "UPA": {
         title: "Recomendação: Unidade de Pronto Atendimento (UPA)",
-        message: "Seu caso é de MÉDIA COMPLEXIDADE e requer atenção rápida. A UPA tem capacidade para resolver a maioria das urgências, como febre persistente, vômitos, ou suturas de cortes leves.",
+        message: "Seu caso é de MÉDIA COMPLEXIDADE e requer atenção rápida. A UPA tem capacidade para resolver a maioria das urgências, como febre persistente, vômitos ou suturas de cortes leves.",
         color: "#ffc107",
         score: 5
     },
     "EMERGENCIA": {
         title: "Recomendação: EMERGÊNCIA HOSPITALAR (Chame o SAMU/192)",
-        message: "Seu caso é de ALTA COMPLEXIDADE. Dor no peito, falta de ar, sangramento incontrolável ou perda de consciência exigem atendimento IMEDIATO no hospital. Não dirija, chame o serviço de emergência.",
-        color: "#dc3545",
+        message: "Seu caso é de ALTA COMPLEXIDADE. Dor no peito, falta de ar, sangramento incontrolável ou perda de consciência exigem atendimento IMEDIATO no hospital. Não dirija, chame o serviço de emergência. Não mova o paciente em caso de acidente/inconsciência.",
+        color: "#dc3545ff",
         score: 100 // Pontuação alta, aciona o fim imediato
     },
     "NEXT": { // Tipo para continuar o quiz sem acumular risco (neutro)
