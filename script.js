@@ -9,7 +9,7 @@ const quizData = [
         question: "1. Qual dos seguintes sintomas você está sentindo AGORA?",
         options: [
             { text: "Febre baixa (até 38°C), dor de garganta leve, tosse ou dor de cabeça discreta.", type: "UBS" },
-            { text: "Febre alta (acima de 39°C), vômitos persistentes, dore de cabeça moderada a forte (enxaqueca) ou dor abdominal moderada.", type: "UPA" },
+            { text: "Febre alta (acima de 39°C), vômitos persistentes, dores de cabeça moderada a forte (enxaqueca) ou dor abdominal moderada.", type: "UPA" },
             { text: "Dor no peito, falta de ar súbita, sangramento grave ou perda de consciência.", type: "EMERGENCIA" },
         ],
     },
